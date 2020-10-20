@@ -38,7 +38,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked){
-                    myAdapter.addFragment(new FragmentOne(),1);
+                    myAdapter.addFragment(new FragmentGrid(),1);
                     myAdapter.notifyDataSetChanged();
                 } else {
                     myAdapter.removeFragment(1);
