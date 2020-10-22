@@ -1,12 +1,10 @@
 package com.example.viewpager2sample;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.SeekBar;
-import android.widget.TextView;
 
 import java.util.Arrays;
 
@@ -16,11 +14,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 public class FragmentGrid extends Fragment implements MyRecyclerViewAdapter.ItemClickListener {
 
-    MyRecyclerViewAdapter adapter;
-    String[] data = {"1", "2", "3", "4", "5", "6"};
-    String[] actualData;
-    GridLayoutManager manager;
-    RecyclerView recyclerView;
+    private MyRecyclerViewAdapter adapter;
+    private String[] data = {"1", "2", "3", "4", "5", "6"};
+    private String[] actualData;
+    private GridLayoutManager manager;
+    private RecyclerView recyclerView;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,

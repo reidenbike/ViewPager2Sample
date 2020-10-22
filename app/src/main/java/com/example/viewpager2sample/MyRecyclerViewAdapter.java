@@ -1,11 +1,11 @@
 package com.example.viewpager2sample;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -47,8 +47,6 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
         int rows = Math.min(mData.length, 3);
         lp.height = height / rows;
         holder.itemView.setLayoutParams(lp);
-
-        Log.i("TAG","onBind");
     }
 
     // total number of cells
