@@ -1,6 +1,7 @@
 package com.example.viewpager2sample;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,11 +15,13 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
     private String[] mData;
     private LayoutInflater mInflater;
     private ItemClickListener mClickListener;
+    private int height;
 
     // data is passed into the constructor
-    MyRecyclerViewAdapter(Context context, String[] data) {
+    MyRecyclerViewAdapter(Context context, String[] data, int height) {
         this.mInflater = LayoutInflater.from(context);
         this.mData = data;
+        this.height = height;
     }
 
     // inflates the cell layout from xml when needed
@@ -39,6 +42,13 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         holder.myTextView.setText(mData[position]);
+
+        GridLayoutManager.LayoutParams lp = (GridLayoutManager.LayoutParams) holder.itemView.getLayoutParams();
+        int rows = Math.min(mData.length, 3);
+        lp.height = height / rows;
+        holder.itemView.setLayoutParams(lp);
+
+        Log.i("TAG","onBind");
     }
 
     // total number of cells
@@ -76,5 +86,11 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
     // parent activity will implement this method to respond to click events
     public interface ItemClickListener {
         void onItemClick(View view, int position);
+    }
+
+    void updateViewNumber(String[] data, int height){
+        this.mData = data;
+        this.height = height;
+        notifyDataSetChanged();
     }
 }
