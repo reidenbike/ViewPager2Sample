@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="grid_padding">5dp</dimen>
+    <dimen name="grid_padding">1.5dp</dimen>
 </resources>

@@ -1,6 +1,7 @@
 package com.example.viewpager2sample;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -61,7 +62,7 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
 
         ViewHolder(View itemView) {
             super(itemView);
-            myTextView = itemView.findViewById(R.id.info_text);
+            myTextView = itemView.findViewById(R.id.txtData);
             itemView.setOnClickListener(this);
         }
 
@@ -88,6 +89,11 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
 
     void updateViewNumber(String[] data, int height){
         this.mData = data;
+        this.height = height;
+        notifyDataSetChanged();
+    }
+
+    void updateHeight (int height) {
         this.height = height;
         notifyDataSetChanged();
     }

@@ -5,9 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.SeekBar;
-
 import java.util.Arrays;
-
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -19,6 +17,7 @@ public class FragmentGrid extends Fragment implements MyRecyclerViewAdapter.Item
     private String[] actualData;
     private GridLayoutManager manager;
     private RecyclerView recyclerView;
+    private SeekBar viewSeekBar;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -31,9 +30,16 @@ public class FragmentGrid extends Fragment implements MyRecyclerViewAdapter.Item
 
         // set up the RecyclerView
         recyclerView = view.findViewById(R.id.rvNumbers);
+
         int numberOfColumns = 2;
 
-        manager = new GridLayoutManager(getActivity(), numberOfColumns);
+
+        manager = new GridLayoutManager(getActivity(), numberOfColumns) {
+            @Override
+            public boolean canScrollVertically() {
+                return false;
+            }
+        };
         manager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
             @Override
             public int getSpanSize(int position) {
@@ -72,7 +78,7 @@ public class FragmentGrid extends Fragment implements MyRecyclerViewAdapter.Item
             }
         });
 
-        SeekBar viewSeekBar = view.findViewById(R.id.viewSeekBar);
+        viewSeekBar = view.findViewById(R.id.viewSeekBar);
         viewSeekBar.setMax(6);
         viewSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -195,6 +201,12 @@ public class FragmentGrid extends Fragment implements MyRecyclerViewAdapter.Item
             });
 
             adapter.updateViewNumber(Arrays.copyOfRange(actualData, position, position + 1), recyclerView.getMeasuredHeight());
+        }
+    }
+
+    void updateHeight (int viewPagerHeight) {
+        if (recyclerView != null && getContext() != null) {
+            adapter.updateHeight((int) (viewPagerHeight - (viewSeekBar.getMeasuredHeight() + 3 * (getContext().getResources().getDimension(R.dimen.grid_padding)))));
         }
     }
 }

@@ -54,14 +54,14 @@ public class ViewPagerFragmentAdapter extends FragmentStateAdapter {
     void addFragment (Fragment fragment, int fragNumber) {
         int insertPosition = mFragmentOrderNumber.size();
         for (Integer orderNumber : mFragmentOrderNumber){
-            Log.i("OrderNum","To add: " + fragNumber + ", In list: "+orderNumber);
+            //Log.i("OrderNum","To add: " + fragNumber + ", In list: "+orderNumber);
             if (orderNumber > fragNumber){
                 insertPosition = mFragmentOrderNumber.indexOf(orderNumber);
                 break;
             }
         }
 
-        Log.i("OrderNum","Insert Position: " + insertPosition);
+        //Log.i("OrderNum","Insert Position: " + insertPosition);
 
         mFragments.add(insertPosition,fragment);
         mFragmentOrderNumber.add(insertPosition,fragNumber);
@@ -75,6 +75,12 @@ public class ViewPagerFragmentAdapter extends FragmentStateAdapter {
             mFragments.remove(index);
             mFragmentIDs.remove(index);
             mFragmentOrderNumber.remove(index);
+        }
+    }
+
+    void updateHeight (int viewPagerHeight) {
+        for (Fragment fragment : mFragments){
+            ((FragmentGrid) fragment).updateHeight(viewPagerHeight);
         }
     }
 }
