@@ -83,4 +83,10 @@ public class ViewPagerFragmentAdapter extends FragmentStateAdapter {
             ((FragmentGrid) fragment).updateHeight(viewPagerHeight);
         }
     }
+
+    void updateDataDisplays (ArrayList<String> dataValues) {
+        for (Fragment fragment : mFragments){
+            ((FragmentGrid) fragment).updateDataDisplays(dataValues);
+        }
+    }
 }

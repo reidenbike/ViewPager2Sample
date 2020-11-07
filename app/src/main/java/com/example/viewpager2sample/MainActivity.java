@@ -5,6 +5,7 @@ import androidx.fragment.app.Fragment;
 import androidx.viewpager2.widget.ViewPager2;
 
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -13,6 +14,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -22,6 +24,10 @@ public class MainActivity extends AppCompatActivity {
     TextView txtGpsStatus;
 
     Switch switchOne, switchTwo, switchThree;
+
+    //Simulate GPS callback / ride calculations:
+    private int mInterval = 1000; // 5 seconds by default, can be changed later
+    private Handler mHandler;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,6 +91,37 @@ public class MainActivity extends AppCompatActivity {
         });
 
         txtGpsStatus = findViewById(R.id.txtGpsStatus);
+
+        //Simulate GPS callbacks:
+        mHandler = new Handler();
+        startRepeatingTask();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        stopRepeatingTask();
+    }
+
+    Runnable mStatusChecker = new Runnable() {
+        @Override
+        public void run() {
+            try {
+                updateDataDisplays(); //this function can change value of mInterval.
+            } finally {
+                // 100% guarantee that this always happens, even if
+                // your update method throws an exception
+                mHandler.postDelayed(mStatusChecker, mInterval);
+            }
+        }
+    };
+
+    void startRepeatingTask() {
+        mStatusChecker.run();
+    }
+
+    void stopRepeatingTask() {
+        mHandler.removeCallbacks(mStatusChecker);
     }
 
     void setAlertVisibility (final boolean visible) {
@@ -103,5 +140,18 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         });
+    }
+
+    void updateDataDisplays () {
+        ArrayList<String> dataValues = new ArrayList<>();
+
+        for (int i = 0; i <= 20; i++){
+            dataValues.add(String.valueOf(new Random().nextInt(20)));
+        }
+
+        if (dataValues.size() > 0) {
+            myAdapter.updateDataDisplays(dataValues);
+        }
+
     }
 }
