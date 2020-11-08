@@ -43,7 +43,7 @@ public class FragmentGrid extends Fragment implements MyRecyclerViewAdapter.Item
         setSpanSize();
 
         viewSeekBar = view.findViewById(R.id.viewSeekBar);
-        viewSeekBar.setMax(8);
+        viewSeekBar.setMax(10);
         viewSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
@@ -112,7 +112,15 @@ public class FragmentGrid extends Fragment implements MyRecyclerViewAdapter.Item
             @Override
             public int getSpanSize(int position) {
                 int spanSize;
-                if (numberOfDisplays == 8) {
+                if (numberOfDisplays == 10) {
+                    spanSize = 1;
+                } else if (numberOfDisplays == 9) {
+                    if (position == 0) {
+                        spanSize = 2;
+                    } else {
+                        spanSize = 1;
+                    }
+                } else if (numberOfDisplays == 8) {
                     spanSize = 1;
                 } else if (numberOfDisplays == 7) {
                     if (position == 0) {

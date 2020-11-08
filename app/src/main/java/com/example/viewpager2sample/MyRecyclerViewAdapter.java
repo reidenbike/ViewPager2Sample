@@ -1,6 +1,7 @@
 package com.example.viewpager2sample;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,11 +21,13 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
     private int numberOfDisplays;
 
     //Data Displays
-    private Integer[] dataFieldOptions = {0,5,1,4,2,3,6,7}; //This would be retrieved from database after user saves which and how many data fields to display
+    private Integer[] dataFieldOptions = {0,9,1,8,2,7,3,6,4,5}; //This would be retrieved from database after user saves which and how many data fields to display
     private int maximizedView = 0;
     private boolean viewMaximized = false;
     private String[] mLabels = {"speed","speed_average","dist","elevation_gain","elevation_loss","alt","grade","power","power_average","power_5s","power_30s","power_5min"};
+    private String[] mUnits = {"m\nh","m\nh","m\ni","ft","ft","ft","%","W","W","W","W","W"};
     private ArrayList<String> mData;
+    private ArrayList<TextView> textViews = new ArrayList<>();
 
     // data is passed into the constructor
     MyRecyclerViewAdapter(Context context, int numberOfDisplays, int height) {
@@ -44,8 +47,12 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
         int rows;
         if (viewMaximized){
             rows = 1;
+        } else if (numberOfDisplays > 8) {
+            rows = 5;
+        } else if (numberOfDisplays > 6) {
+            rows = 4;
         } else {
-            rows = (numberOfDisplays > 6) ? 4 : Math.min(numberOfDisplays, 3);
+            rows = Math.min(numberOfDisplays, 3);
         }
 
         lp.height = parent.getMeasuredHeight() / rows;
@@ -60,22 +67,36 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
         if (viewMaximized){
             position = maximizedView;
         }
-        holder.txtLabel.setText(mLabels[dataFieldOptions[position]]);
-        if (mData != null) {
-            holder.txtData.setText(mData.get(dataFieldOptions[position]));
-        }
 
         GridLayoutManager.LayoutParams lp = (GridLayoutManager.LayoutParams) holder.itemView.getLayoutParams();
 
         int rows;
         if (viewMaximized){
             rows = 1;
+        } else if (numberOfDisplays > 8) {
+            rows = 5;
+        } else if (numberOfDisplays > 6) {
+            rows = 4;
         } else {
-            rows = (numberOfDisplays > 6) ? 4 : Math.min(numberOfDisplays, 3);
+            rows = Math.min(numberOfDisplays, 3);
         }
 
-        lp.height = height / rows;
+        /*if (numberOfDisplays > 4 && numberOfDisplays % 2 != 0){
+            lp.height = (int) (position == 0 ? height * 0.4 : height * 0.6 / (rows - 1));
+        } else {*/
+            lp.height = height / rows;
+        //}
         holder.itemView.setLayoutParams(lp);
+
+        holder.txtLabel.setText(mLabels[dataFieldOptions[position]]);
+        holder.txtUnit.setText(mUnits[dataFieldOptions[position]]);
+        if (mData != null) {
+            holder.txtData.setText(mData.get(dataFieldOptions[position]));
+        }
+
+        textViews.add(holder.txtData);
+
+        Log.i("TAG","Binding view holder: " + position);
     }
 
     // total number of cells
@@ -92,11 +113,13 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
     public class ViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
         TextView txtLabel;
         TextView txtData;
+        TextView txtUnit;
 
         ViewHolder(View itemView) {
             super(itemView);
             txtLabel = itemView.findViewById(R.id.txtLabel);
             txtData = itemView.findViewById(R.id.txtData);
+            txtUnit = itemView.findViewById(R.id.txtUnit);
             itemView.setOnClickListener(this);
         }
 
@@ -124,6 +147,7 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
     void updateViewNumber(int numberOfDisplays, int height){
         this.height = height;
         this.numberOfDisplays = numberOfDisplays;
+        this.textViews.clear();
         notifyDataSetChanged();
     }
 
@@ -131,16 +155,35 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<MyRecyclerViewAd
         this.height = height;
         this.viewMaximized = viewMaximized;
         maximizedView = position;
+        this.textViews.clear();
         notifyDataSetChanged();
     }
 
     void updateHeight (int height) {
         this.height = height;
+        this.textViews.clear();
         notifyDataSetChanged();
     }
 
     void updateDataDisplays (ArrayList<String> dataValues) {
         mData = dataValues;
-        notifyDataSetChanged();
+
+        Log.i("MAX",maximizedView + ", " + viewMaximized);
+
+        if (textViews.size() == ((viewMaximized) ? 1 : numberOfDisplays)) {
+            if (viewMaximized){
+                textViews.get(0).setText(mData.get(dataFieldOptions[maximizedView]));
+            } else {
+                int i = 0;
+                for (Integer dataFieldOptions : dataFieldOptions) {
+                    textViews.get(i).setText(mData.get(dataFieldOptions));
+                    i++;
+                    if (i >= numberOfDisplays) {
+                        break;
+                    }
+                }
+            }
+        }
+        //notifyDataSetChanged();
     }
 }

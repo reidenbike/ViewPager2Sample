@@ -146,7 +146,7 @@ public class MainActivity extends AppCompatActivity {
         ArrayList<String> dataValues = new ArrayList<>();
 
         for (int i = 0; i <= 20; i++){
-            dataValues.add(String.valueOf(new Random().nextInt(20)));
+            dataValues.add(String.valueOf(new Random().nextInt(10) + (i*10)));
         }
 
         if (dataValues.size() > 0) {

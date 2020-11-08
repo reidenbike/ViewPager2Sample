@@ -1,3 +1,19 @@
 <resources>
     <string name="app_name">ViewPager2Sample</string>
+
+    <string name="mph_stacked">m\nh</string>
+    <string name="kph_stacked">k\nh</string>
+    <string name="mph_inline">mph</string>
+    <string name="mi_stacked">m\ni</string>
+    <string name="km_stacked">k\nm</string>
+    <string name="mi_inline">mi</string>
+    <string name="mi_units">mi</string>
+    <string name="kilo">k</string>
+    <string name="km_inline">km</string>
+    <string name="ft_inline">ft</string>
+    <string name="ft_stacked">ft</string>
+    <string name="m_inline">m</string>
+    <string name="w_inline">W</string>
+    <string name="kilo_joules_inline">kJ</string>
+    <string name="zone_abbreviation">Z</string>
 </resources>
