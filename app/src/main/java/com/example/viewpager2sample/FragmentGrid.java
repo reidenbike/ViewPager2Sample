@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.SeekBar;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
@@ -78,11 +79,18 @@ public class FragmentGrid extends Fragment implements MyRecyclerViewAdapter.Item
     }
 
     @Override
-    public void onItemClick(View view, int position) {
+    public void onItemClick(View view, int position, boolean antiBurnMode) {
+        if (antiBurnMode){
+            ((MainActivity) Objects.requireNonNull(getActivity())).enableAntiScreenBurnMode(false);
+        } else {
+            maximizeView(position);
+        }
+    }
 
+    void maximizeView (int position) {
         if (manager.getChildCount() == 1 && numberOfDisplays > 1){
             setSpanSize();
-            adapter.maximizeView(false, position, recyclerView.getMeasuredHeight());
+            adapter.maximizeView(false,false, position, recyclerView.getMeasuredHeight());
         } else if (numberOfDisplays > 1) {
             manager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
                 @Override
@@ -91,7 +99,7 @@ public class FragmentGrid extends Fragment implements MyRecyclerViewAdapter.Item
                 }
             });
 
-            adapter.maximizeView(true, position, recyclerView.getMeasuredHeight());
+            adapter.maximizeView(false,true, position, recyclerView.getMeasuredHeight());
         }
     }
 
@@ -104,6 +112,20 @@ public class FragmentGrid extends Fragment implements MyRecyclerViewAdapter.Item
     void updateDataDisplays (ArrayList<String> dataValues) {
         if (adapter != null && dataValues != null) {
             adapter.updateDataDisplays(dataValues);
+        }
+    }
+
+    void enableAntiBurnMode (boolean antiBurnMode) {
+        if (antiBurnMode) {
+            manager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
+                @Override
+                public int getSpanSize(int position) {
+                    return 2;
+                }
+            });
+            adapter.maximizeView(true, true, 0, recyclerView.getMeasuredHeight());
+        } else {
+            maximizeView(0);
         }
     }
 

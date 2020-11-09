@@ -4,7 +4,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager2.widget.ViewPager2;
 
+import android.graphics.Color;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
@@ -28,6 +30,9 @@ public class MainActivity extends AppCompatActivity {
     //Simulate GPS callback / ride calculations:
     private int mInterval = 1000; // 5 seconds by default, can be changed later
     private Handler mHandler;
+
+    //Screen burn timer
+    private CountDownTimer antiScreenBurnTimer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -95,6 +100,38 @@ public class MainActivity extends AppCompatActivity {
         //Simulate GPS callbacks:
         mHandler = new Handler();
         startRepeatingTask();
+
+        boolean screenOnStatus = true;
+        long screenBurnTimerLength = (screenOnStatus) ? 60000 : 120000;
+
+        antiScreenBurnTimer = new CountDownTimer(screenBurnTimerLength,1000) {
+            @Override
+            public void onTick(long l) {
+
+            }
+
+            @Override
+            public void onFinish() {
+                //Log.i("Screen","Timer Finished");
+                try {
+                    enableAntiScreenBurnMode(true);
+                } catch (Exception e){
+                    //Log.i("Exception", "Anti Screen Burn Mode Timer onFinish failure: " + e);
+                }
+
+            }
+        };
+        antiScreenBurnTimer.start();
+    }
+
+    public void enableAntiScreenBurnMode(boolean antiBurnMode){
+        myAdapter.enableAntiBurnMode(antiBurnMode);
+    }
+
+    @Override
+    public void onUserInteraction(){
+        antiScreenBurnTimer.cancel();
+        antiScreenBurnTimer.start();
     }
 
     @Override

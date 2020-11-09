@@ -89,4 +89,10 @@ public class ViewPagerFragmentAdapter extends FragmentStateAdapter {
             ((FragmentGrid) fragment).updateDataDisplays(dataValues);
         }
     }
+
+    void enableAntiBurnMode (boolean antiBurnMode) {
+        for (Fragment fragment : mFragments){
+            ((FragmentGrid) fragment).enableAntiBurnMode(antiBurnMode);
+        }
+    }
 }

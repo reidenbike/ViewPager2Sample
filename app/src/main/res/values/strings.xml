@@ -16,4 +16,5 @@
     <string name="w_inline">W</string>
     <string name="kilo_joules_inline">kJ</string>
     <string name="zone_abbreviation">Z</string>
+    <string name="zero">0</string>
 </resources>
