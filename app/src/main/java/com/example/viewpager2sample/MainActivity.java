@@ -49,15 +49,23 @@ public class MainActivity extends AppCompatActivity {
 
         myViewPager2.setAdapter(myAdapter);
 
+        myViewPager2.setOffscreenPageLimit(8);
+
         switchOne = findViewById(R.id.switchOne);
         switchOne.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked){
-                    myAdapter.addFragment(new FragmentGrid(),1);
+                    //myAdapter.addFragment(new FragmentGrid(),1);
+                    myAdapter.editDisplays(true);
+                    if (myAdapter.getItemCount() < 5) {
+                        myAdapter.addFragment(new FragmentAdd(), 100);
+                    }
                     myAdapter.notifyDataSetChanged();
                 } else {
-                    myAdapter.removeFragment(1);
+                    //myAdapter.removeFragment(1);
+                    myAdapter.editDisplays(false);
+                    myAdapter.removeFragment(100);
                     myAdapter.notifyDataSetChanged();
                 }
             }
@@ -189,6 +197,17 @@ public class MainActivity extends AppCompatActivity {
         if (dataValues.size() > 0) {
             myAdapter.updateDataDisplays(dataValues);
         }
+    }
 
+    void addFragment () {
+        if (myAdapter.getItemCount() <= 5) {
+            myAdapter.addFragment(new FragmentGrid(), myAdapter.getItemCount());
+
+            if (myAdapter.getItemCount() > 5){
+                myAdapter.removeFragment(100);
+            }
+
+            myAdapter.notifyDataSetChanged();
+        }
     }
 }

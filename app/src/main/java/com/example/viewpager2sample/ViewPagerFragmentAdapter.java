@@ -1,7 +1,5 @@
 package com.example.viewpager2sample;
 
-import android.util.Log;
-
 import java.util.ArrayList;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -17,7 +15,7 @@ public class ViewPagerFragmentAdapter extends FragmentStateAdapter {
     private ArrayList<Integer> mFragmentOrderNumber = new ArrayList<>();
 
 
-    public ViewPagerFragmentAdapter(@NonNull FragmentManager fragmentManager, @NonNull Lifecycle lifecycle) {
+    ViewPagerFragmentAdapter(@NonNull FragmentManager fragmentManager, @NonNull Lifecycle lifecycle) {
         super(fragmentManager, lifecycle);
     }
 
@@ -80,19 +78,33 @@ public class ViewPagerFragmentAdapter extends FragmentStateAdapter {
 
     void updateHeight (int viewPagerHeight) {
         for (Fragment fragment : mFragments){
-            ((FragmentGrid) fragment).updateHeight(viewPagerHeight);
+            if (fragment instanceof FragmentGrid) {
+                ((FragmentGrid) fragment).updateHeight(/*viewPagerHeight*/);
+            }
         }
     }
 
     void updateDataDisplays (ArrayList<String> dataValues) {
         for (Fragment fragment : mFragments){
-            ((FragmentGrid) fragment).updateDataDisplays(dataValues);
+            if (fragment instanceof FragmentGrid) {
+                ((FragmentGrid) fragment).updateDataDisplays(dataValues);
+            }
         }
     }
 
     void enableAntiBurnMode (boolean antiBurnMode) {
         for (Fragment fragment : mFragments){
-            ((FragmentGrid) fragment).enableAntiBurnMode(antiBurnMode);
+            if (fragment instanceof FragmentGrid) {
+                ((FragmentGrid) fragment).enableAntiBurnMode(antiBurnMode);
+            }
+        }
+    }
+
+    void editDisplays(boolean enableEdit){
+        for (Fragment fragment : mFragments){
+            if (fragment instanceof FragmentGrid) {
+                ((FragmentGrid) fragment).editDisplays(enableEdit);
+            }
         }
     }
 }

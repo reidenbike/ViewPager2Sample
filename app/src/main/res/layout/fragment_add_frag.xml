@@ -7,18 +7,14 @@
     android:padding="@dimen/grid_padding"
     android:background="#151515">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rvNumbers"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
+    <Button
+        android:id="@+id/buttonAdd"
+        android:layout_width="150dp"
+        android:layout_height="150dp"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/viewSeekBar"/>
-
-    <androidx.appcompat.widget.AppCompatSeekBar
-        android:id="@+id/viewSeekBar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
-        android:visibility="visible"/>
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        android:background="@drawable/ic_add_box_white_24dp"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -27,7 +27,9 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     private static final int VIEW_TYPE_DEFAULT = 0;
     private static final int VIEW_TYPE_MAX = 1;
     private static final int VIEW_TYPE_ANTI_BURN = 2;
+    private static final int VIEW_TYPE_EDIT = 3;
     private boolean antiburn = false;
+    private boolean editDisplays = false;
 
     //Data Displays
     private Integer[] dataFieldOptions = {0,9,1,8,2,7,3,6,4,5}; //This would be retrieved from database after user saves which and how many data fields to display
@@ -50,7 +52,9 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
     @Override
     public int getItemViewType(int position) {
-        if (antiburn) {
+        if (editDisplays){
+            return VIEW_TYPE_EDIT;
+        } else if (antiburn) {
             return VIEW_TYPE_ANTI_BURN;
         } else if (viewMaximized) {
             return VIEW_TYPE_MAX;
@@ -88,6 +92,12 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
                 return new ViewHolderAntiBurn(viewAntiBurn);
 
+            case VIEW_TYPE_EDIT:
+                View viewEdit = LayoutInflater.from(parent.getContext())
+                        .inflate(R.layout.recyclerview_item_edit, parent, false);
+
+                return new ViewHolderEdit(viewEdit);
+
             //VIEW_TYPE_USER_DEFAULT
             default:
                 View view = LayoutInflater.from(parent.getContext())
@@ -121,17 +131,6 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
         holder.itemView.setLayoutParams(lp);
 
-        /*holder.txtLabel.setText(mLabels[dataFieldOptions[position]]);
-        holder.txtUnit.setText(mUnits[dataFieldOptions[position]]);
-        if (mData != null) {
-            holder.txtData.setText(mData.get(dataFieldOptions[position]));
-        }
-
-        textViews.add(holder.txtData);*/
-
-        Log.i("TAG","Binding view holder: " + position);
-
-
         //Assign the holder:
         switch (holder.getItemViewType()){
             case VIEW_TYPE_DEFAULT:
@@ -142,6 +141,9 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.Vie
                 break;
             case VIEW_TYPE_ANTI_BURN:
                 ((ViewHolderAntiBurn) holder).bind(position);
+                break;
+            case VIEW_TYPE_EDIT:
+                ((ViewHolderEdit) holder).bind(position);
                 break;
         }
     }
@@ -282,6 +284,26 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         }
     }
 
+    public class ViewHolderEdit extends RecyclerView.ViewHolder implements View.OnClickListener {
+        TextView txtLabel;
+
+        ViewHolderEdit(View itemView) {
+            super(itemView);
+            txtLabel = itemView.findViewById(R.id.txtLabel);
+
+            itemView.setOnClickListener(this);
+        }
+
+        @Override
+        public void onClick(View view) {
+
+        }
+
+        void bind (int position) {
+            txtLabel.setText(mLabels[dataFieldOptions[position]]);
+        }
+    }
+
     // convenience method for getting data at click position
     String getItem(int id) {
         return mData.get(dataFieldOptions[id]);
@@ -346,5 +368,11 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.Vie
             }
         }
         //notifyDataSetChanged();
+    }
+
+    void editDisplays (boolean enableEdit) {
+        editDisplays = enableEdit;
+        this.textViews.clear();
+        notifyDataSetChanged();
     }
 }

@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
 import android.widget.SeekBar;
 
 import java.util.ArrayList;
@@ -103,9 +104,9 @@ public class FragmentGrid extends Fragment implements MyRecyclerViewAdapter.Item
         }
     }
 
-    void updateHeight (int viewPagerHeight) {
+    void updateHeight (/*int viewPagerHeight*/) {
         if (recyclerView != null && getContext() != null) {
-            adapter.updateHeight((int) (viewPagerHeight - (viewSeekBar.getMeasuredHeight() + 3 * (getContext().getResources().getDimension(R.dimen.grid_padding)))));
+            adapter.updateHeight(recyclerView.getMeasuredHeight()/*(int) (viewPagerHeight - (viewSeekBar.getMeasuredHeight() + 2 * (getContext().getResources().getDimension(R.dimen.grid_padding))))*/);
         }
     }
 
@@ -181,6 +182,27 @@ public class FragmentGrid extends Fragment implements MyRecyclerViewAdapter.Item
                 }
 
                 return spanSize;
+            }
+        });
+    }
+
+    void editDisplays (final boolean enableEdit) {
+        if (enableEdit) {
+            viewSeekBar.setVisibility(View.VISIBLE);
+        } else {
+            viewSeekBar.setVisibility(View.GONE);
+        }
+
+        adapter.editDisplays(enableEdit);
+
+        viewSeekBar.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+            @Override
+            public void onGlobalLayout() {
+                //Log.i("TAG","updating height to " + "Visible = " + visible);
+                if (enableEdit ? viewSeekBar.getVisibility() == View.VISIBLE : viewSeekBar.getVisibility() == View.GONE) {
+                    updateHeight();
+                    viewSeekBar.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                }
             }
         });
     }
