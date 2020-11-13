@@ -46,7 +46,7 @@ public class ViewPagerFragmentAdapter extends FragmentStateAdapter {
 
     @Override
     public boolean containsItem(long itemId) {
-        return mFragmentIDs.contains((int)itemId);
+        return mFragmentOrderNumber.contains((int)itemId);
     }
 
     void addFragment (Fragment fragment, int fragNumber) {

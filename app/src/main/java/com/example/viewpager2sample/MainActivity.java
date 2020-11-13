@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.viewpager2.widget.ViewPager2;
 
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -15,15 +16,21 @@ import android.widget.CompoundButton;
 import android.widget.Switch;
 import android.widget.TextView;
 
+import com.google.gson.Gson;
+
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.Random;
 
 public class MainActivity extends AppCompatActivity {
 
     ViewPager2 myViewPager2;
     ViewPagerFragmentAdapter myAdapter;
-    private ArrayList<Fragment> arrayList = new ArrayList<>();
     TextView txtGpsStatus;
+    int numberFragments;
+
+    //Shared Preferences
+    private String displayPrefs = "display_config";
 
     Switch switchOne, switchTwo, switchThree;
 
@@ -39,6 +46,9 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        SharedPreferences mPrefs = getSharedPreferences(displayPrefs,MODE_PRIVATE);
+        numberFragments = mPrefs.getInt("number_frags",2);
+
         myViewPager2 = findViewById(R.id.viewpager);
 
         // add Fragments in your ViewPagerFragmentAdapter class
@@ -50,6 +60,8 @@ public class MainActivity extends AppCompatActivity {
         myViewPager2.setAdapter(myAdapter);
 
         myViewPager2.setOffscreenPageLimit(8);
+
+        addFragment(numberFragments);
 
         switchOne = findViewById(R.id.switchOne);
         switchOne.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -199,15 +211,23 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    void addFragment () {
-        if (myAdapter.getItemCount() <= 5) {
-            myAdapter.addFragment(new FragmentGrid(), myAdapter.getItemCount());
+    void addFragment (int numberFragmentsToAdd) {
+        for (int i = 0; i < numberFragmentsToAdd; i++) {
+            if (myAdapter.getItemCount() <= 5) {
+                myAdapter.addFragment(FragmentGrid.newInstance(myAdapter.getItemCount()), myAdapter.getItemCount());
 
-            if (myAdapter.getItemCount() > 5){
-                myAdapter.removeFragment(100);
+                if (myAdapter.getItemCount() > 5) {
+                    myAdapter.removeFragment(100);
+                }
             }
-
-            myAdapter.notifyDataSetChanged();
         }
+        myAdapter.notifyDataSetChanged();
+
+        numberFragments = myAdapter.containsItem(100) ? myAdapter.getItemCount() - 1 : myAdapter.getItemCount();
+
+        SharedPreferences mPrefs = getSharedPreferences(displayPrefs,MODE_PRIVATE);
+        SharedPreferences.Editor prefsEditor = mPrefs.edit();
+        prefsEditor.putInt("number_frags", numberFragments);
+        prefsEditor.apply();
     }
 }

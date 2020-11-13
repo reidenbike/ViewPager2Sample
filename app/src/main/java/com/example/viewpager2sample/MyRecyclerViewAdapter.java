@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,10 +12,17 @@ import android.view.ViewGroup;
 import android.view.animation.LinearInterpolator;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import com.google.gson.Gson;
+
 import java.util.ArrayList;
+import java.util.Arrays;
+
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+
+import static android.content.Context.MODE_PRIVATE;
 
 public class MyRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
@@ -22,6 +30,7 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     private ItemClickListener mClickListener;
     private int height;
     private int numberOfDisplays;
+    private Context context;
 
     //View Types
     private static final int VIEW_TYPE_DEFAULT = 0;
@@ -32,7 +41,7 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     private boolean editDisplays = false;
 
     //Data Displays
-    private Integer[] dataFieldOptions = {0,9,1,8,2,7,3,6,4,5}; //This would be retrieved from database after user saves which and how many data fields to display
+    private DisplayObject dataFieldOptions; //This would be retrieved from database after user saves which and how many data fields to display
     private int maximizedView = 0;
     private boolean viewMaximized = false;
     private String[] mLabels = {"speed","speed_average","dist","elevation_gain","elevation_loss","alt","grade","power","power_average","power_5s","power_30s","power_5min"};
@@ -43,11 +52,21 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
     private ObjectAnimator anim;
 
+    //Shared Preferences
+    private String displayPrefs = "display_config";
+
     // data is passed into the constructor
-    MyRecyclerViewAdapter(Context context, int numberOfDisplays, int height) {
+    MyRecyclerViewAdapter(Context context, DisplayObject dataFieldOptions, int height) {
         //this.mInflater = LayoutInflater.from(context);
+
+        this.context = context;
+
+        this.dataFieldOptions = dataFieldOptions;
+
         this.height = height;
-        this.numberOfDisplays = numberOfDisplays;
+        this.numberOfDisplays = dataFieldOptions.getNumberDisplays();
+
+        notifyDataSetChanged();
     }
 
     @Override
@@ -178,10 +197,10 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         }
 
         void bind (int position) {
-            txtLabel.setText(mLabels[dataFieldOptions[position]]);
-            txtUnit.setText(mUnits[dataFieldOptions[position]]);
+            txtLabel.setText(mLabels[dataFieldOptions.getMetric(position)]);
+            txtUnit.setText(mUnits[dataFieldOptions.getMetric(position)]);
             if (mData != null) {
-                txtData.setText(mData.get(dataFieldOptions[position]));
+                txtData.setText(mData.get(dataFieldOptions.getMetric(position)));
             }
 
             textViews.add(txtData);
@@ -207,10 +226,10 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         }
 
         void bind (int position) {
-            txtLabel.setText(mLabels[dataFieldOptions[position]]);
-            txtUnit.setText(mUnitsInline[dataFieldOptions[position]]);
+            txtLabel.setText(mLabels[dataFieldOptions.getMetric(position)]);
+            txtUnit.setText(mUnitsInline[dataFieldOptions.getMetric(position)]);
             if (mData != null) {
-                txtData.setText(mData.get(dataFieldOptions[position]));
+                txtData.setText(mData.get(dataFieldOptions.getMetric(position)));
             }
 
             textViews.add(txtData);
@@ -272,10 +291,10 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         }
 
         void bind (int position) {
-            txtLabel.setText(mLabels[dataFieldOptions[position]]);
-            txtUnit.setText(mUnitsInline[dataFieldOptions[position]]);
+            txtLabel.setText(mLabels[dataFieldOptions.getMetric(position)]);
+            txtUnit.setText(mUnitsInline[dataFieldOptions.getMetric(position)]);
             if (mData != null) {
-                txtData.setText(mData.get(dataFieldOptions[position]));
+                txtData.setText(mData.get(dataFieldOptions.getMetric(position)));
             }
 
             textViews.add(txtData);
@@ -300,13 +319,13 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         }
 
         void bind (int position) {
-            txtLabel.setText(mLabels[dataFieldOptions[position]]);
+            txtLabel.setText(mLabels[dataFieldOptions.getMetric(position)]);
         }
     }
 
     // convenience method for getting data at click position
     String getItem(int id) {
-        return mData.get(dataFieldOptions[id]);
+        return mData.get(dataFieldOptions.getMetric(id));
     }
 
     // allows clicks events to be caught
@@ -351,28 +370,33 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     void updateDataDisplays (ArrayList<String> dataValues) {
         mData = dataValues;
 
-        Log.i("MAX",maximizedView + ", " + viewMaximized);
-
         if (textViews.size() == ((viewMaximized) ? 1 : numberOfDisplays)) {
             if (viewMaximized){
-                textViews.get(0).setText(mData.get(dataFieldOptions[maximizedView]));
+                textViews.get(0).setText(mData.get(dataFieldOptions.getMetric(maximizedView)));
             } else {
-                int i = 0;
-                for (Integer dataFieldOptions : dataFieldOptions) {
-                    textViews.get(i).setText(mData.get(dataFieldOptions));
-                    i++;
-                    if (i >= numberOfDisplays) {
-                        break;
-                    }
+                for (int i = 0; i < numberOfDisplays; i++) {
+                    textViews.get(i).setText(mData.get(dataFieldOptions.getMetric(i)));
                 }
             }
         }
-        //notifyDataSetChanged();
     }
 
-    void editDisplays (boolean enableEdit) {
+    void editDisplays (boolean enableEdit, int fragNumber) {
+
+        if (!enableEdit){
+            dataFieldOptions.setNumberDisplays(numberOfDisplays);
+
+            SharedPreferences mPrefs = context.getSharedPreferences(displayPrefs,MODE_PRIVATE);
+
+            SharedPreferences.Editor prefsEditor = mPrefs.edit();
+            Gson gson = new Gson();
+            String json = gson.toJson(dataFieldOptions);
+            prefsEditor.putString("display_" + fragNumber, json);
+            prefsEditor.apply();
+
+        }
+
         editDisplays = enableEdit;
         this.textViews.clear();
-        notifyDataSetChanged();
     }
 }

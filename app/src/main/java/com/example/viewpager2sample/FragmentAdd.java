@@ -26,7 +26,7 @@ public class FragmentAdd extends Fragment {
         buttonAdd.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                ((MainActivity) Objects.requireNonNull(getActivity())).addFragment();
+                ((MainActivity) Objects.requireNonNull(getActivity())).addFragment(1);
             }
         });
 
