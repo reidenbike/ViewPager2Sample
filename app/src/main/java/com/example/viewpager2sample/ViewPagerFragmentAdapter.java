@@ -1,5 +1,7 @@
 package com.example.viewpager2sample;
 
+import android.util.Log;
+
 import java.util.ArrayList;
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
@@ -68,12 +70,32 @@ public class ViewPagerFragmentAdapter extends FragmentStateAdapter {
     }
 
     void removeFragment (int fragNumber){
+        Log.i("TAGTAG","mFragmentOrderNumber: " + mFragmentOrderNumber);
         if (mFragmentOrderNumber.contains(fragNumber)){
             int index = mFragmentOrderNumber.indexOf(fragNumber);
             mFragments.remove(index);
             mFragmentIDs.remove(index);
             mFragmentOrderNumber.remove(index);
         }
+    }
+
+    int getVisibleFragment () {
+        for (Fragment fragment : mFragments){
+            if ( fragment.isVisible() && fragment instanceof FragmentGrid) {
+                Log.i("TAGTAG","Frag " + ((FragmentGrid) fragment).getFragNumber() + ", Visible: " + fragment.isVisible());
+                return ((FragmentGrid) fragment).getFragNumber();
+            }
+        }
+        return getItemCount() -1;
+    }
+
+    boolean isEditFragPresent () {
+        for (Fragment fragment : mFragments){
+            if (fragment instanceof FragmentAdd) {
+                return true;
+            }
+        }
+        return false;
     }
 
     void updateHeight (int viewPagerHeight) {

@@ -7,6 +7,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.SeekBar;
 
 import com.google.gson.Gson;
@@ -26,7 +28,7 @@ public class FragmentGrid extends Fragment implements MyRecyclerViewAdapter.Item
     private MyRecyclerViewAdapter adapter;
     private GridLayoutManager manager;
     private RecyclerView recyclerView;
-    private SeekBar viewSeekBar;
+    private LinearLayout editLayout;
 
     private int numberOfDisplays = 5;
     private int fragNumber = 0;
@@ -41,8 +43,10 @@ public class FragmentGrid extends Fragment implements MyRecyclerViewAdapter.Item
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_gridlayout, container, false);
 
+        boolean editMode = false;
         if (getArguments() != null) {
             fragNumber = getArguments().getInt("fragNumber");
+            editMode = getArguments().getBoolean("edit");
         }
         SharedPreferences mPrefs = Objects.requireNonNull(getActivity()).getSharedPreferences(displayPrefs,MODE_PRIVATE);
         Gson gson = new Gson();
@@ -83,7 +87,9 @@ public class FragmentGrid extends Fragment implements MyRecyclerViewAdapter.Item
             }
         });
 
-        viewSeekBar = view.findViewById(R.id.viewSeekBar);
+        editLayout = view.findViewById(R.id.editLayout);
+
+        SeekBar viewSeekBar = view.findViewById(R.id.viewSeekBar);
         viewSeekBar.setMax(10);
         viewSeekBar.setProgress(adapter.getItemCount());
         viewSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -110,6 +116,18 @@ public class FragmentGrid extends Fragment implements MyRecyclerViewAdapter.Item
 
             }
         });
+
+        ImageButton buttonDelete = view.findViewById(R.id.buttonDelete);
+        buttonDelete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                ((MainActivity) Objects.requireNonNull(getActivity())).deleteFragment(fragNumber);
+            }
+        });
+
+        if (editMode){
+            editDisplays(true);
+        }
 
         return view;
     }
@@ -223,30 +241,40 @@ public class FragmentGrid extends Fragment implements MyRecyclerViewAdapter.Item
 
     void editDisplays (final boolean enableEdit) {
         if (enableEdit) {
-            viewSeekBar.setVisibility(View.VISIBLE);
+            editLayout.setVisibility(View.VISIBLE);
+
+            if (manager.getChildCount() == 1 && numberOfDisplays > 1){
+                setSpanSize();
+                adapter.maximizeView(false,false, 0, recyclerView.getMeasuredHeight());
+            }
         } else {
-            viewSeekBar.setVisibility(View.GONE);
+            editLayout.setVisibility(View.GONE);
         }
 
         adapter.editDisplays(enableEdit, fragNumber);
 
-        viewSeekBar.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+        editLayout.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
             public void onGlobalLayout() {
                 //Log.i("TAG","updating height to " + "Visible = " + visible);
-                if (enableEdit ? viewSeekBar.getVisibility() == View.VISIBLE : viewSeekBar.getVisibility() == View.GONE) {
+                if (enableEdit ? editLayout.getVisibility() == View.VISIBLE : editLayout.getVisibility() == View.GONE) {
                     updateHeight();
-                    viewSeekBar.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                    editLayout.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                 }
             }
         });
     }
 
-    static FragmentGrid newInstance(int fragNumber) {
+    int getFragNumber(){
+        return fragNumber;
+    }
+
+    static FragmentGrid newInstance(int fragNumber, boolean editMode) {
         FragmentGrid fragmentGrid = new FragmentGrid();
         /* See this code gets executed immediately on your object construction */
         Bundle args = new Bundle();
         args.putInt("fragNumber", fragNumber);
+        args.putBoolean("edit", editMode);
         fragmentGrid.setArguments(args);
         return fragmentGrid;
     }
