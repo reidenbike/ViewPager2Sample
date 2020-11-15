@@ -4,8 +4,30 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity"
-    android:background="#151515">
+    tools:context=".MainActivity">
+
+    <Chronometer
+        android:id="@+id/simpleChronometer"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/display_panel_black"
+        android:layout_marginStart="3dp"
+        android:layout_marginEnd="3dp"
+        android:layout_marginBottom="@dimen/grid_padding"
+        android:layout_marginTop="3dp"
+        android:gravity="center"
+        android:textColor="@color/colorDisplayText"
+        android:textSize="60sp"
+        android:autoSizeMaxTextSize="400sp"
+        android:autoSizeMinTextSize="12sp"
+        android:autoSizeStepGranularity="2sp"
+        android:autoSizeTextType="uniform"
+        android:includeFontPadding="false"
+        android:textStyle="bold"
+        tools:ignore="UnusedAttribute"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"/>
 
     <TextView
         android:id="@+id/txtGpsStatus"
@@ -18,31 +40,44 @@
         android:padding="10dp"
         android:gravity="center"
         android:visibility="gone"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintTop_toBottomOf="@id/simpleChronometer"/>
 
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/viewpager"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintTop_toBottomOf="@id/txtGpsStatus"
-        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/switchLayout"
         />
 
-<!--    <LinearLayout
+    <LinearLayout
         android:id="@+id/switchLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:padding="5dp"
         app:layout_constraintBottom_toBottomOf="parent"
         android:visibility="gone">
         <ImageButton
-            android:id="@+id/buttonDelete"
-            android:layout_width="match_parent"
+            android:id="@+id/buttonCancel"
+            android:layout_width="0dp"
+            android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:src="@drawable/ic_delete_black_24dp"
+            android:src="@drawable/ic_cancel_black_24dp"
+            android:background="@drawable/button_cancel"
+            android:layout_margin="5dp"
+            android:padding="5dp"
             android:contentDescription="Delete" />
-    <Switch
+        <ImageButton
+            android:id="@+id/buttonDone"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_done_black_24dp"
+            android:background="@drawable/button_done"
+            android:layout_margin="5dp"
+            android:padding="5dp"
+            android:contentDescription="Delete" />
+    <!--<Switch
         android:id="@+id/switchOne"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -56,7 +91,7 @@
             android:id="@+id/switchThree"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"/>
-    </LinearLayout>-->
+            android:layout_weight="1"/>-->
+    </LinearLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -8,4 +8,13 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="RideTheme" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">#000000</item>
+        <item name="colorPrimaryDark">#000000</item>
+        <item name="colorAccent">#59e045</item>
+        <item name="colorControlNormal">#aaaaaa</item>
+        <item name="android:windowBackground">@color/colorRideBackground</item>
+    </style>
+
 </resources>

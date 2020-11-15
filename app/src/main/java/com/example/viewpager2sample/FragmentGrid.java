@@ -2,7 +2,6 @@ package com.example.viewpager2sample;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,13 +9,10 @@ import android.view.ViewTreeObserver;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
-
 import com.google.gson.Gson;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
-
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -33,10 +29,6 @@ public class FragmentGrid extends Fragment implements MyRecyclerViewAdapter.Item
     private int numberOfDisplays = 5;
     private int fragNumber = 0;
 
-    //Shared Preferences
-    private String displayPrefs = "display_config";
-    DisplayObject dataFieldOptions;
-
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -48,10 +40,12 @@ public class FragmentGrid extends Fragment implements MyRecyclerViewAdapter.Item
             fragNumber = getArguments().getInt("fragNumber");
             editMode = getArguments().getBoolean("edit");
         }
-        SharedPreferences mPrefs = Objects.requireNonNull(getActivity()).getSharedPreferences(displayPrefs,MODE_PRIVATE);
+        //Shared Preferences
+        SharedPreferences mPrefs = Objects.requireNonNull(getActivity()).getSharedPreferences("display_config",MODE_PRIVATE);
         Gson gson = new Gson();
         String json = mPrefs.getString("display_" + fragNumber, "");
 
+        DisplayObject dataFieldOptions;
         if (!json.equals("")) {
             dataFieldOptions = gson.fromJson(json, DisplayObject.class);
             numberOfDisplays = dataFieldOptions.getNumberDisplays();
@@ -72,7 +66,7 @@ public class FragmentGrid extends Fragment implements MyRecyclerViewAdapter.Item
             }
         };
 
-        setSpanSize();
+        setSpanSize(numberOfDisplays);
 
         recyclerView.setLayoutManager(manager);
         adapter = new MyRecyclerViewAdapter(Objects.requireNonNull(getActivity()), dataFieldOptions, recyclerView.getMeasuredHeight());
@@ -96,13 +90,13 @@ public class FragmentGrid extends Fragment implements MyRecyclerViewAdapter.Item
             @Override
             public void onProgressChanged(SeekBar seekBar, int i, boolean b) {
 
-                numberOfDisplays = i;
+                //numberOfDisplays = i;
 
                 if (i > 0) {
 
-                    setSpanSize();
+                    setSpanSize(i);
 
-                    adapter.updateViewNumber(numberOfDisplays, recyclerView.getMeasuredHeight());
+                    adapter.updateViewNumber(i, recyclerView.getMeasuredHeight());
                 }
             }
 
@@ -126,7 +120,7 @@ public class FragmentGrid extends Fragment implements MyRecyclerViewAdapter.Item
         });
 
         if (editMode){
-            editDisplays(true);
+            editDisplays(true, false, fragNumber);
         }
 
         return view;
@@ -142,8 +136,8 @@ public class FragmentGrid extends Fragment implements MyRecyclerViewAdapter.Item
     }
 
     private void maximizeView(int position) {
-        if (manager.getChildCount() == 1 && numberOfDisplays > 1){
-            setSpanSize();
+        if (manager.getChildCount() == 1){
+            setSpanSize(numberOfDisplays);
             adapter.maximizeView(false,false, position, recyclerView.getMeasuredHeight());
         } else if (numberOfDisplays > 1) {
             manager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
@@ -169,6 +163,12 @@ public class FragmentGrid extends Fragment implements MyRecyclerViewAdapter.Item
         }
     }
 
+    void updateSpecificMetricDisplays (int metric, String dataValue) {
+        if (adapter != null) {
+            adapter.updateSpecificMetricDisplays(metric, dataValue);
+        }
+    }
+
     void enableAntiBurnMode (boolean antiBurnMode) {
         if (antiBurnMode) {
             manager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
@@ -183,7 +183,7 @@ public class FragmentGrid extends Fragment implements MyRecyclerViewAdapter.Item
         }
     }
 
-    private void setSpanSize() {
+    private void setSpanSize(final int numberOfDisplays) {
         manager.setSpanSizeLookup(new GridLayoutManager.SpanSizeLookup() {
             @Override
             public int getSpanSize(int position) {
@@ -239,19 +239,25 @@ public class FragmentGrid extends Fragment implements MyRecyclerViewAdapter.Item
         });
     }
 
-    void editDisplays (final boolean enableEdit) {
+    void editDisplays (final boolean enableEdit, boolean save, int fragNumber) {
         if (enableEdit) {
             editLayout.setVisibility(View.VISIBLE);
 
             if (manager.getChildCount() == 1 && numberOfDisplays > 1){
-                setSpanSize();
+                setSpanSize(numberOfDisplays);
                 adapter.maximizeView(false,false, 0, recyclerView.getMeasuredHeight());
             }
         } else {
             editLayout.setVisibility(View.GONE);
+            if (save){
+                numberOfDisplays = adapter.getItemCount();
+            } else {
+                setSpanSize(numberOfDisplays);
+                adapter.updateViewNumber(numberOfDisplays, recyclerView.getMeasuredHeight());
+            }
         }
 
-        adapter.editDisplays(enableEdit, fragNumber);
+        adapter.editDisplays(enableEdit, fragNumber, save);
 
         editLayout.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
             @Override
@@ -263,10 +269,6 @@ public class FragmentGrid extends Fragment implements MyRecyclerViewAdapter.Item
                 }
             }
         });
-    }
-
-    int getFragNumber(){
-        return fragNumber;
     }
 
     static FragmentGrid newInstance(int fragNumber, boolean editMode) {

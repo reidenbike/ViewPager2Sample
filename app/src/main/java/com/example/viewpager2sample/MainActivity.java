@@ -4,17 +4,14 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewTreeObserver;
-import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
-import android.widget.Switch;
 import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.Random;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.viewpager2.widget.ViewPager2;
 
@@ -24,15 +21,21 @@ public class MainActivity extends AppCompatActivity {
     ViewPagerFragmentAdapter myAdapter;
     TextView txtGpsStatus;
     int numberFragments;
+    int maxFragNumber = 5;
 
     //Shared Preferences
     private String displayPrefs = "display_config";
 
     //Switch switchOne, switchTwo, switchThree;
+    private LinearLayout switchLayout;
+    private ImageButton buttonDone;
+    private ImageButton buttonCancel;
 
     //Simulate GPS callback / ride calculations:
-    private int mInterval = 1000; // 5 seconds by default, can be changed later
+    private int mInterval = 2000;
+    private int mIntervalIndependent = 1000;
     private Handler mHandler;
+    private Handler mHandlerIndependent;
 
     //Screen burn timer
     private CountDownTimer antiScreenBurnTimer;
@@ -60,6 +63,26 @@ public class MainActivity extends AppCompatActivity {
 
         myAdapter.addFragment(new FragmentSettings(),0);
         addFragment(numberFragments,false);
+
+        myViewPager2.setCurrentItem(1,false);
+
+        switchLayout = findViewById(R.id.switchLayout);
+
+        buttonDone = findViewById(R.id.buttonDone);
+        buttonDone.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                enterEditMode(false,true);
+            }
+        });
+
+        buttonCancel = findViewById(R.id.buttonCancel);
+        buttonCancel.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                enterEditMode(false,false);
+            }
+        });
 
 /*        switchOne = findViewById(R.id.switchOne);
         switchOne.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
@@ -117,6 +140,7 @@ public class MainActivity extends AppCompatActivity {
 
         //Simulate GPS callbacks:
         mHandler = new Handler();
+        mHandlerIndependent = new Handler();
         startRepeatingTask();
 
         boolean screenOnStatus = true;
@@ -172,12 +196,27 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    Runnable independentDataRunnable = new Runnable() {
+        @Override
+        public void run() {
+            try {
+                updateSpecificMetricDisplays(); //this function can change value of mInterval.
+            } finally {
+                // 100% guarantee that this always happens, even if
+                // your update method throws an exception
+                mHandlerIndependent.postDelayed(independentDataRunnable, mIntervalIndependent);
+            }
+        }
+    };
+
     void startRepeatingTask() {
         mStatusChecker.run();
+        independentDataRunnable.run();
     }
 
     void stopRepeatingTask() {
         mHandler.removeCallbacks(mStatusChecker);
+        mHandlerIndependent.removeCallbacks(independentDataRunnable);
     }
 
     void setAlertVisibility (final boolean visible) {
@@ -191,7 +230,7 @@ public class MainActivity extends AppCompatActivity {
             public void onGlobalLayout() {
                 //Log.i("TAG","updating height to " + "Visible = " + visible);
                 if (visible ? txtGpsStatus.getVisibility() == View.VISIBLE : txtGpsStatus.getVisibility() == View.GONE) {
-                    myAdapter.updateHeight(myViewPager2.getMeasuredHeight());
+                    myAdapter.updateHeight();
                     txtGpsStatus.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                 }
             }
@@ -210,55 +249,69 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    void enterEditMode (boolean edit) {
+    void updateSpecificMetricDisplays () {
+        myAdapter.updateSpecificMetricDisplays(7,String.valueOf(new Random().nextInt(10) + (7*10))); //Metric 7 == Power value
+    }
+
+    void enterEditMode (boolean edit, boolean save) {
         if (edit){
-            //switchLayout.setVisibility(View.VISIBLE);
+            switchLayout.setVisibility(View.VISIBLE);
             if (antiBurnMode) {
                 enableAntiScreenBurnMode(false);
             }
-            myAdapter.editDisplays(true);
+            myAdapter.editDisplays(true, save);
             if (myAdapter.getItemCount() < 6) {
                 myAdapter.addFragment(new FragmentAdd(), 100);
             }
             myAdapter.notifyDataSetChanged();
+            myViewPager2.setCurrentItem(1,true);
         } else {
-            //switchLayout.setVisibility(View.GONE);
-            //myAdapter.removeFragment(1);
-            myAdapter.editDisplays(false);
+            switchLayout.setVisibility(View.GONE);
+            myAdapter.setEditButton();
+            myAdapter.editDisplays(false, save);
             myAdapter.removeFragment(100);
+
+            if (save){
+                saveFragNumber();
+            } else {
+                int numberDisplayFrags = myAdapter.getNumberDisplayFragment();
+                if (numberFragments > numberDisplayFrags){
+                    addFragment(numberFragments - numberDisplayFrags, false);
+                } else if (numberFragments < numberDisplayFrags){
+                    do {
+                        deleteFragment(myAdapter.getItemCount());
+                    } while (numberFragments < numberDisplayFrags);
+                }
+            }
+
             myAdapter.notifyDataSetChanged();
         }
     }
 
     void addFragment (int numberFragmentsToAdd, boolean editMode) {
         for (int i = 0; i < numberFragmentsToAdd; i++) {
-            if (myAdapter.getItemCount() <= 6) {
+            int numberDisplayFragments = myAdapter.getNumberDisplayFragment();
+            if (numberDisplayFragments < maxFragNumber) {
                 myAdapter.addFragment(FragmentGrid.newInstance(myAdapter.getItemCount(),editMode), myAdapter.getItemCount());
 
-                if (myAdapter.getItemCount() > 6) {
+                if (numberDisplayFragments >= maxFragNumber - 1) {
                     myAdapter.removeFragment(100);
                 }
             }
         }
         myAdapter.notifyDataSetChanged();
-
-        numberFragments = myAdapter.containsItem(100) ? myAdapter.getItemCount() - 2 : myAdapter.getItemCount();
-
-        SharedPreferences mPrefs = getSharedPreferences(displayPrefs,MODE_PRIVATE);
-        SharedPreferences.Editor prefsEditor = mPrefs.edit();
-        prefsEditor.putInt("number_frags", numberFragments);
-        prefsEditor.apply();
     }
 
     void deleteFragment (int fragNumber) {
-        Log.i("TAGTAG","Visible Frag: " + myAdapter.getVisibleFragment());
         myAdapter.removeFragment(fragNumber);
         if (!myAdapter.isEditFragPresent()) {
             myAdapter.addFragment(new FragmentAdd(), 100);
         }
         myAdapter.notifyDataSetChanged();
+    }
 
-        numberFragments = myAdapter.containsItem(100) ? myAdapter.getItemCount() - 2 : myAdapter.getItemCount();
+    void saveFragNumber () {
+        numberFragments = myAdapter.getNumberDisplayFragment();
 
         SharedPreferences mPrefs = getSharedPreferences(displayPrefs,MODE_PRIVATE);
         SharedPreferences.Editor prefsEditor = mPrefs.edit();

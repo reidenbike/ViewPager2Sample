@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -12,16 +13,12 @@ import android.view.ViewGroup;
 import android.view.animation.LinearInterpolator;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-
 import com.google.gson.Gson;
-
 import java.util.ArrayList;
-import java.util.Arrays;
-
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import static android.content.Context.MODE_PRIVATE;
 
 public class MyRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
@@ -44,7 +41,7 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     private DisplayObject dataFieldOptions; //This would be retrieved from database after user saves which and how many data fields to display
     private int maximizedView = 0;
     private boolean viewMaximized = false;
-    private String[] mLabels = {"speed","speed_average","dist","elevation_gain","elevation_loss","alt","grade","power","power_average","power_5s","power_30s","power_5min"};
+    private String[] mLabels = {"Speed","Average Speed","Distance","Elevation Gain","Elevation Loss","Altitude","Percent Grade","Power","Average Power","5s Power","30s Power","5 min Power"};
     private String[] mUnits = {"m\nh","m\nh","m\ni","ft","ft","ft","%","W","W","W","W","W"};
     private String[] mUnitsInline = {"mph","mph","mi","ft","ft","ft","%","W","W","W","W","W"};
     private ArrayList<String> mData;
@@ -315,12 +312,34 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
         @Override
         public void onClick(View view) {
-
+            displayMetricSelection(getBindingAdapterPosition(),txtLabel);
         }
 
         void bind (int position) {
             txtLabel.setText(mLabels[dataFieldOptions.getMetric(position)]);
         }
+    }
+
+    private void displayMetricSelection(final int position, final TextView txtLabel) {
+        AlertDialog.Builder b = new AlertDialog.Builder(context);
+        b.setTitle("Select Display Metric");
+        b.setItems(mLabels, new DialogInterface.OnClickListener() {
+
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                dialog.dismiss();
+                setDisplayMetrics(position,which,txtLabel);
+            }
+
+        });
+
+        b.show();
+    }
+
+    private void setDisplayMetrics(int position, int metric, TextView txtLabel){
+        dataFieldOptions.setMetric(position, metric);
+        txtLabel.setText(mLabels[metric]);
     }
 
     // convenience method for getting data at click position
@@ -371,29 +390,50 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         mData = dataValues;
 
         if (textViews.size() == ((viewMaximized) ? 1 : numberOfDisplays)) {
-            if (viewMaximized){
-                textViews.get(0).setText(mData.get(dataFieldOptions.getMetric(maximizedView)));
+            if (viewMaximized){ // 7 == Power Metric. This will change in dataFieldOptions object to check if metric is independent of GPS recording points or not
+                if (dataFieldOptions.getMetric(maximizedView) != 7) {
+                    textViews.get(0).setText(mData.get(dataFieldOptions.getMetric(maximizedView)));
+                }
             } else {
                 for (int i = 0; i < numberOfDisplays; i++) {
-                    textViews.get(i).setText(mData.get(dataFieldOptions.getMetric(i)));
+                    if (dataFieldOptions.getMetric(i) != 7) {
+                        textViews.get(i).setText(mData.get(dataFieldOptions.getMetric(i)));
+                    }
                 }
             }
         }
     }
 
-    void editDisplays (boolean enableEdit, int fragNumber) {
+    void updateSpecificMetricDisplays (int metric, String dataValue){
+        if (textViews.size() == ((viewMaximized) ? 1 : numberOfDisplays)) {
+            if (viewMaximized){
+                if (dataFieldOptions.getMetric(maximizedView) == metric) {
+                    textViews.get(0).setText(dataValue);
+                }
+            } else {
+                for (int i = 0; i < numberOfDisplays; i++) {
+                    if (dataFieldOptions.getMetric(i) == metric) {
+                        textViews.get(i).setText(dataValue);
+                    }
+                }
+            }
+        }
+    }
+
+    void editDisplays (boolean enableEdit, int fragNumber, boolean save) {
 
         if (!enableEdit){
             dataFieldOptions.setNumberDisplays(numberOfDisplays);
 
-            SharedPreferences mPrefs = context.getSharedPreferences(displayPrefs,MODE_PRIVATE);
+            if (save) {
+                SharedPreferences mPrefs = context.getSharedPreferences(displayPrefs, MODE_PRIVATE);
 
-            SharedPreferences.Editor prefsEditor = mPrefs.edit();
-            Gson gson = new Gson();
-            String json = gson.toJson(dataFieldOptions);
-            prefsEditor.putString("display_" + fragNumber, json);
-            prefsEditor.apply();
-
+                SharedPreferences.Editor prefsEditor = mPrefs.edit();
+                Gson gson = new Gson();
+                String json = gson.toJson(dataFieldOptions);
+                prefsEditor.putString("display_" + fragNumber, json);
+                prefsEditor.apply();
+            }
         }
 
         editDisplays = enableEdit;

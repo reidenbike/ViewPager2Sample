@@ -79,14 +79,14 @@ public class ViewPagerFragmentAdapter extends FragmentStateAdapter {
         }
     }
 
-    int getVisibleFragment () {
+    int getNumberDisplayFragment () {
+        int number = 0;
         for (Fragment fragment : mFragments){
-            if ( fragment.isVisible() && fragment instanceof FragmentGrid) {
-                Log.i("TAGTAG","Frag " + ((FragmentGrid) fragment).getFragNumber() + ", Visible: " + fragment.isVisible());
-                return ((FragmentGrid) fragment).getFragNumber();
+            if (fragment instanceof FragmentGrid) {
+                number++;
             }
         }
-        return getItemCount() -1;
+        return number;
     }
 
     boolean isEditFragPresent () {
@@ -98,10 +98,10 @@ public class ViewPagerFragmentAdapter extends FragmentStateAdapter {
         return false;
     }
 
-    void updateHeight (int viewPagerHeight) {
+    void updateHeight () {
         for (Fragment fragment : mFragments){
             if (fragment instanceof FragmentGrid) {
-                ((FragmentGrid) fragment).updateHeight(/*viewPagerHeight*/);
+                ((FragmentGrid) fragment).updateHeight();
             }
         }
     }
@@ -114,6 +114,14 @@ public class ViewPagerFragmentAdapter extends FragmentStateAdapter {
         }
     }
 
+    void updateSpecificMetricDisplays (int metric, String dataValue) {
+        for (Fragment fragment : mFragments){
+            if (fragment instanceof FragmentGrid) {
+                ((FragmentGrid) fragment).updateSpecificMetricDisplays(metric,dataValue);
+            }
+        }
+    }
+
     void enableAntiBurnMode (boolean antiBurnMode) {
         for (Fragment fragment : mFragments){
             if (fragment instanceof FragmentGrid) {
@@ -122,10 +130,21 @@ public class ViewPagerFragmentAdapter extends FragmentStateAdapter {
         }
     }
 
-    void editDisplays(boolean enableEdit){
+    void editDisplays(boolean enableEdit, boolean save){
+        int fragNum = 0;
         for (Fragment fragment : mFragments){
             if (fragment instanceof FragmentGrid) {
-                ((FragmentGrid) fragment).editDisplays(enableEdit);
+                fragNum++;
+                ((FragmentGrid) fragment).editDisplays(enableEdit, save, fragNum);
+            }
+        }
+    }
+
+    void setEditButton() {
+        for (Fragment fragment : mFragments){
+            if (fragment instanceof FragmentSettings){
+                ((FragmentSettings) fragment).setEditButton();
+                break;
             }
         }
     }

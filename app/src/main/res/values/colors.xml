@@ -4,5 +4,7 @@
     <color name="colorPrimaryDark">#3700B3</color>
     <color name="colorAccent">#03DAC5</color>
 
-    <color name="colorDisplayText">#bbbbbb</color>
+    <color name="colorDisplayText">#999999</color>
+
+    <color name="colorRideBackground">#151515</color>
 </resources>
