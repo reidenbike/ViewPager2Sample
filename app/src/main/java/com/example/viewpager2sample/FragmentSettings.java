@@ -26,7 +26,9 @@ public class FragmentSettings extends Fragment {
         buttonEdit.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                ((MainActivity) Objects.requireNonNull(getActivity())).enterEditMode(b,true);
+                if (compoundButton.isPressed()) {
+                    ((MainActivity) Objects.requireNonNull(getActivity())).enterEditMode(b, true);
+                }
             }
         });
 

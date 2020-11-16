@@ -2,8 +2,9 @@
     <string name="app_name">ViewPager2Sample</string>
 
     <string name="mph_stacked">m\nh</string>
-    <string name="kph_stacked">k\nh</string>
     <string name="mph_inline">mph</string>
+    <string name="kph_stacked">k\nh</string>
+    <string name="kph">km/h</string>
     <string name="mi_stacked">m\ni</string>
     <string name="km_stacked">k\nm</string>
     <string name="mi_inline">mi</string>
@@ -17,4 +18,27 @@
     <string name="kilo_joules_inline">kJ</string>
     <string name="zone_abbreviation">Z</string>
     <string name="zero">0</string>
+    <string name="percent_inline">%</string>
+
+
+
+
+
+    <string name="current_speed">Current Speed</string>
+    <string name="averageSpeed">Average Speed</string>
+    <string name="distance">Distance</string>
+    <string name="elevationGain">Elevation Gain</string>
+    <string name="elevationLoss">Elevation Loss</string>
+    <string name="altitude">Altitude</string>
+    <string name="percent_grade">Percent Grade</string>
+
+    <string name="caloriesBurned">Calories Burned</string>
+
+
+
+    <string name="current_power">Current Power</string>
+    <string name="averagePower">Average Power</string>
+    <string name="five_s_power">5 s Power</string>
+    <string name="thirty_s_power">30 s Power</string>
+    <string name="five_min_power">5 min Power</string>
 </resources>

@@ -28,6 +28,7 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     private int height;
     private int numberOfDisplays;
     private Context context;
+    private boolean metric;
 
     //View Types
     private static final int VIEW_TYPE_DEFAULT = 0;
@@ -39,21 +40,16 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
     //Data Displays
     private DisplayObject dataFieldOptions; //This would be retrieved from database after user saves which and how many data fields to display
+    private ArrayList<Integer> dataFieldOptionsNew;
     private int maximizedView = 0;
     private boolean viewMaximized = false;
-    private String[] mLabels = {"Speed","Average Speed","Distance","Elevation Gain","Elevation Loss","Altitude","Percent Grade","Power","Average Power","5s Power","30s Power","5 min Power"};
-    private String[] mUnits = {"m\nh","m\nh","m\ni","ft","ft","ft","%","W","W","W","W","W"};
-    private String[] mUnitsInline = {"mph","mph","mi","ft","ft","ft","%","W","W","W","W","W"};
     private ArrayList<String> mData;
     private ArrayList<TextView> textViews = new ArrayList<>();
 
     private ObjectAnimator anim;
 
-    //Shared Preferences
-    private String displayPrefs = "display_config";
-
     // data is passed into the constructor
-    MyRecyclerViewAdapter(Context context, DisplayObject dataFieldOptions, int height) {
+    MyRecyclerViewAdapter(Context context, DisplayObject dataFieldOptions, int height, boolean metric) {
         //this.mInflater = LayoutInflater.from(context);
 
         this.context = context;
@@ -62,6 +58,8 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
         this.height = height;
         this.numberOfDisplays = dataFieldOptions.getNumberDisplays();
+
+        this.metric = metric;
 
         notifyDataSetChanged();
     }
@@ -83,17 +81,6 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     @Override
     @NonNull
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-
-        /*int rows;
-        if (viewMaximized){
-            rows = 1;
-        } else if (numberOfDisplays > 8) {
-            rows = 5;
-        } else if (numberOfDisplays > 6) {
-            rows = 4;
-        } else {
-            rows = Math.min(numberOfDisplays, 3);
-        }*/
 
         switch (viewType){
             case VIEW_TYPE_MAX:
@@ -194,8 +181,9 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         }
 
         void bind (int position) {
-            txtLabel.setText(mLabels[dataFieldOptions.getMetric(position)]);
-            txtUnit.setText(mUnits[dataFieldOptions.getMetric(position)]);
+            Metrics metrics = Metrics.findByMetricNumber(dataFieldOptions.getMetric(position));
+            txtLabel.setText(metrics.getLabel(context));
+            txtUnit.setText(metrics.getUnits(context,false,metric));
             if (mData != null) {
                 txtData.setText(mData.get(dataFieldOptions.getMetric(position)));
             }
@@ -223,8 +211,9 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         }
 
         void bind (int position) {
-            txtLabel.setText(mLabels[dataFieldOptions.getMetric(position)]);
-            txtUnit.setText(mUnitsInline[dataFieldOptions.getMetric(position)]);
+            Metrics metrics = Metrics.findByMetricNumber(dataFieldOptions.getMetric(position));
+            txtLabel.setText(metrics.getLabel(context));
+            txtUnit.setText(metrics.getUnits(context,true,metric));
             if (mData != null) {
                 txtData.setText(mData.get(dataFieldOptions.getMetric(position)));
             }
@@ -259,27 +248,6 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.Vie
             anim.setRepeatCount(ValueAnimator.INFINITE);
             anim.setRepeatMode(ValueAnimator.REVERSE);
             anim.setInterpolator(new LinearInterpolator());
-            anim.addListener(new Animator.AnimatorListener() {
-                @Override
-                public void onAnimationStart(Animator animator) {
-
-                }
-
-                @Override
-                public void onAnimationEnd(Animator animator) {
-
-                }
-
-                @Override
-                public void onAnimationCancel(Animator animator) {
-
-                }
-
-                @Override
-                public void onAnimationRepeat(Animator animator) {
-                    Log.i("Anim","Anim Repeat");
-                }
-            });
         }
 
         @Override
@@ -288,8 +256,9 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         }
 
         void bind (int position) {
-            txtLabel.setText(mLabels[dataFieldOptions.getMetric(position)]);
-            txtUnit.setText(mUnitsInline[dataFieldOptions.getMetric(position)]);
+            Metrics metrics = Metrics.findByMetricNumber(dataFieldOptions.getMetric(position));
+            txtLabel.setText(metrics.getLabel(context));
+            txtUnit.setText(metrics.getUnits(context,true,metric));
             if (mData != null) {
                 txtData.setText(mData.get(dataFieldOptions.getMetric(position)));
             }
@@ -316,14 +285,15 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.Vie
         }
 
         void bind (int position) {
-            txtLabel.setText(mLabels[dataFieldOptions.getMetric(position)]);
+            Metrics metrics = Metrics.findByMetricNumber(dataFieldOptions.getMetric(position));
+            txtLabel.setText(metrics.getLabel(context));
         }
     }
 
     private void displayMetricSelection(final int position, final TextView txtLabel) {
         AlertDialog.Builder b = new AlertDialog.Builder(context);
         b.setTitle("Select Display Metric");
-        b.setItems(mLabels, new DialogInterface.OnClickListener() {
+        b.setItems(Metrics.getLabelList(context), new DialogInterface.OnClickListener() {
 
             @Override
             public void onClick(DialogInterface dialog, int which) {
@@ -338,14 +308,15 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     }
 
     private void setDisplayMetrics(int position, int metric, TextView txtLabel){
-        dataFieldOptions.setMetric(position, metric);
-        txtLabel.setText(mLabels[metric]);
+        dataFieldOptionsNew.set(position, metric);
+        Metrics metrics = Metrics.findByMetricNumber(metric);
+        txtLabel.setText(metrics.getLabel(context));
     }
 
     // convenience method for getting data at click position
-    String getItem(int id) {
+    /*String getItem(int id) {
         return mData.get(dataFieldOptions.getMetric(id));
-    }
+    }*/
 
     // allows clicks events to be caught
     void setClickListener(ItemClickListener itemClickListener) {
@@ -391,12 +362,12 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.Vie
 
         if (textViews.size() == ((viewMaximized) ? 1 : numberOfDisplays)) {
             if (viewMaximized){ // 7 == Power Metric. This will change in dataFieldOptions object to check if metric is independent of GPS recording points or not
-                if (dataFieldOptions.getMetric(maximizedView) != 7) {
+                if (Metrics.findByMetricNumber(dataFieldOptions.getMetric(maximizedView)).isGpsDependent()) {
                     textViews.get(0).setText(mData.get(dataFieldOptions.getMetric(maximizedView)));
                 }
             } else {
                 for (int i = 0; i < numberOfDisplays; i++) {
-                    if (dataFieldOptions.getMetric(i) != 7) {
+                    if (Metrics.findByMetricNumber(dataFieldOptions.getMetric(i)).isGpsDependent()) {
                         textViews.get(i).setText(mData.get(dataFieldOptions.getMetric(i)));
                     }
                 }
@@ -423,17 +394,24 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.Vie
     void editDisplays (boolean enableEdit, int fragNumber, boolean save) {
 
         if (!enableEdit){
-            dataFieldOptions.setNumberDisplays(numberOfDisplays);
 
             if (save) {
-                SharedPreferences mPrefs = context.getSharedPreferences(displayPrefs, MODE_PRIVATE);
+                dataFieldOptions.setDataFieldOptions(dataFieldOptionsNew);
+                dataFieldOptions.setNumberDisplays(numberOfDisplays);
+
+                SharedPreferences mPrefs = context.getSharedPreferences(Metrics.DISPLAY_PREFS, MODE_PRIVATE);
 
                 SharedPreferences.Editor prefsEditor = mPrefs.edit();
                 Gson gson = new Gson();
                 String json = gson.toJson(dataFieldOptions);
-                prefsEditor.putString("display_" + fragNumber, json);
+                prefsEditor.putString(Metrics.DISPLAY + fragNumber, json);
                 prefsEditor.apply();
+            } else {
+                numberOfDisplays = dataFieldOptions.getNumberDisplays();
+                notifyDataSetChanged();
             }
+        } else {
+            dataFieldOptionsNew = new ArrayList<>(dataFieldOptions.getDataFieldOptions());
         }
 
         editDisplays = enableEdit;

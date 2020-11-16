@@ -70,7 +70,6 @@ public class ViewPagerFragmentAdapter extends FragmentStateAdapter {
     }
 
     void removeFragment (int fragNumber){
-        Log.i("TAGTAG","mFragmentOrderNumber: " + mFragmentOrderNumber);
         if (mFragmentOrderNumber.contains(fragNumber)){
             int index = mFragmentOrderNumber.indexOf(fragNumber);
             mFragments.remove(index);

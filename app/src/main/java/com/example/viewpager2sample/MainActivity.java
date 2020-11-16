@@ -4,6 +4,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.ImageButton;
@@ -23,9 +24,6 @@ public class MainActivity extends AppCompatActivity {
     int numberFragments;
     int maxFragNumber = 5;
 
-    //Shared Preferences
-    private String displayPrefs = "display_config";
-
     //Switch switchOne, switchTwo, switchThree;
     private LinearLayout switchLayout;
     private ImageButton buttonDone;
@@ -41,13 +39,15 @@ public class MainActivity extends AppCompatActivity {
     private CountDownTimer antiScreenBurnTimer;
     private boolean antiBurnMode;
 
+    private boolean metric = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        SharedPreferences mPrefs = getSharedPreferences(displayPrefs,MODE_PRIVATE);
-        numberFragments = mPrefs.getInt("number_frags",2);
+        SharedPreferences mPrefs = getSharedPreferences(Metrics.DISPLAY_PREFS,MODE_PRIVATE);
+        numberFragments = mPrefs.getInt(Metrics.NUMBER_FRAGS,2);
 
         myViewPager2 = findViewById(R.id.viewpager);
 
@@ -279,8 +279,8 @@ public class MainActivity extends AppCompatActivity {
                     addFragment(numberFragments - numberDisplayFrags, false);
                 } else if (numberFragments < numberDisplayFrags){
                     do {
-                        deleteFragment(myAdapter.getItemCount());
-                    } while (numberFragments < numberDisplayFrags);
+                        myAdapter.removeFragment(myAdapter.getItemCount());
+                    } while (numberFragments < myAdapter.getNumberDisplayFragment());
                 }
             }
 
@@ -292,7 +292,7 @@ public class MainActivity extends AppCompatActivity {
         for (int i = 0; i < numberFragmentsToAdd; i++) {
             int numberDisplayFragments = myAdapter.getNumberDisplayFragment();
             if (numberDisplayFragments < maxFragNumber) {
-                myAdapter.addFragment(FragmentGrid.newInstance(myAdapter.getItemCount(),editMode), myAdapter.getItemCount());
+                myAdapter.addFragment(FragmentGrid.newInstance(myAdapter.getItemCount(),editMode,metric), myAdapter.getItemCount());
 
                 if (numberDisplayFragments >= maxFragNumber - 1) {
                     myAdapter.removeFragment(100);
@@ -313,9 +313,9 @@ public class MainActivity extends AppCompatActivity {
     void saveFragNumber () {
         numberFragments = myAdapter.getNumberDisplayFragment();
 
-        SharedPreferences mPrefs = getSharedPreferences(displayPrefs,MODE_PRIVATE);
+        SharedPreferences mPrefs = getSharedPreferences(Metrics.DISPLAY_PREFS,MODE_PRIVATE);
         SharedPreferences.Editor prefsEditor = mPrefs.edit();
-        prefsEditor.putInt("number_frags", numberFragments);
+        prefsEditor.putInt(Metrics.NUMBER_FRAGS, numberFragments);
         prefsEditor.apply();
     }
 }
