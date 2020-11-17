@@ -4,7 +4,6 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.ImageButton;
@@ -19,7 +18,7 @@ import androidx.viewpager2.widget.ViewPager2;
 public class MainActivity extends AppCompatActivity {
 
     ViewPager2 myViewPager2;
-    ViewPagerFragmentAdapter myAdapter;
+    ViewPagerFragmentAdapterV2 myAdapter;
     TextView txtGpsStatus;
     int numberFragments;
     int maxFragNumber = 5;
@@ -53,7 +52,7 @@ public class MainActivity extends AppCompatActivity {
 
         // add Fragments in your ViewPagerFragmentAdapter class
 
-        myAdapter = new ViewPagerFragmentAdapter(getSupportFragmentManager(), getLifecycle());
+        myAdapter = new ViewPagerFragmentAdapterV2(getSupportFragmentManager(), getLifecycle());
         // set Orientation in your ViewPager2
         myViewPager2.setOrientation(ViewPager2.ORIENTATION_HORIZONTAL);
 

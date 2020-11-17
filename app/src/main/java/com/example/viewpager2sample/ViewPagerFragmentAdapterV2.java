@@ -9,7 +9,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.Lifecycle;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 
-public class ViewPagerFragmentAdapter extends FragmentStateAdapter {
+public class ViewPagerFragmentAdapterV2 extends FragmentStateAdapter {
 
     private int idGen = 0;
     private ArrayList<Fragment> mFragments = new ArrayList<>();
@@ -17,7 +17,7 @@ public class ViewPagerFragmentAdapter extends FragmentStateAdapter {
     private ArrayList<Integer> mFragmentOrderNumber = new ArrayList<>();
 
 
-    ViewPagerFragmentAdapter(@NonNull FragmentManager fragmentManager, @NonNull Lifecycle lifecycle) {
+    ViewPagerFragmentAdapterV2(@NonNull FragmentManager fragmentManager, @NonNull Lifecycle lifecycle) {
         super(fragmentManager, lifecycle);
     }
 
