@@ -189,6 +189,7 @@ public class MyRecyclerViewAdapter extends RecyclerView.Adapter<RecyclerView.Vie
             }
 
             textViews.add(txtData);
+            Log.i("TAG","Number of textviews: " + textViews.size());
         }
     }
 
